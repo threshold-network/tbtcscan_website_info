@@ -2,8 +2,7 @@ sources:
   - name: tbtc-mainnet
     handler:
       graphql:
-        endpoint: https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/DETCX5Xm6tJfctRcZAxhQB9q3aK8P4BXLbujHmzEBXYV
-    transforms:
+        endpoint: https://gateway-arbitrum.network.thegraph.com/api/7cc7a8b42a7f9288f995125f449b432c/subgraphs/id/EAabZitXhygFzb9gXNCvwRvfeNJf2qkffv3Kykhdqbj5
       - autoPagination:
           limitOfRecords: 2000
 plugins:

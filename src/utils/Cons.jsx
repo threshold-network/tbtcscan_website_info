@@ -1,4 +1,4 @@
-export const MAINNET_API = "https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/DETCX5Xm6tJfctRcZAxhQB9q3aK8P4BXLbujHmzEBXYV";
+export const MAINNET_API = "https://api.thegraph.com/subgraphs/name/suntzu93/threshold-tbtc";
 export const TESTNET_API = "https://api.thegraph.com/subgraphs/name/suntzu93/threshold-tbtc-goerli";
 
 export const RPC_ETH_MAINNET = import.meta.env.VITE_RPC_ETH_MAINNET;
