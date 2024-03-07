@@ -22,7 +22,8 @@ import { ReactComponent as ShareLink } from "../../assets/link.svg";
 import * as Data from "../../pages/data";
 import TransactionTimeline from "./timeline";
 import * as Utils from "../../utils/utils";
-import {getColorByStatus} from "./view_utils"
+import { getColorByStatus } from "./view_utils";
+import { ReactComponent as Copy } from "../../assets/copy.svg";
 
 export const RedeemTable = ({ columns, data, isLoading }) => {
   const columnData = useMemo(() => columns, [columns]);
@@ -112,7 +113,7 @@ export const RedeemTable = ({ columns, data, isLoading }) => {
     rowCount: PropTypes.number.isRequired,
   };
 
-  const [order, setOrder] = React.useState("asc");
+  const [order, setOrder] = React.useState("desc");
   const [orderBy, setOrderBy] = React.useState("updateTime");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(100);
@@ -165,33 +166,22 @@ export const RedeemTable = ({ columns, data, isLoading }) => {
             <Link
               target="_blank"
               underline="hover"
-              href={Utils.getDomain() + "?user=" + row.depositor}
+              href={Utils.getDomain() + "?user=" + row.redeemer}
               className={styles.link}
             >
               {Data.formatString(row.redeemer)}
             </Link>
             <ShareLink />
           </TableCell>
-          <TableCell align="left">{Data.formatGwei(row.amount)}</TableCell>
-          <TableCell align="left" sx={{color:getColorByStatus(row.status)}}>{row.status}</TableCell>
+          <TableCell align="left">{Data.formatSatoshi(row.amount)}</TableCell>
           <TableCell align="left">
-            {
-              row.completedTxHash?.length > 0 ? (
-                  <>
-                    <Link
-                        target="_blank"
-                        underline="hover"
-                        href={Utils.getBlockStreamInfo() + row.completedTxHash}
-                        className={styles.link}
-                    >
-                      {Data.formatString(row.completedTxHash)}
-                    </Link>
-                    <ShareLink />
-                  </>
-              ) : (
-                  "..."
-              )
-            }
+            {row.status !== "COMPLETED"
+              ? "0.000000"
+              : Data.formatSatoshi(row.actualAmountReceived)}
+          </TableCell>
+
+          <TableCell align="left" sx={{ color: getColorByStatus(row.status) }}>
+            {row.status}
           </TableCell>
         </TableRow>
         <TableRow className={styles.container_detail}>
@@ -212,27 +202,65 @@ export const RedeemTable = ({ columns, data, isLoading }) => {
                     >
                       <TableBody>
                         <TableRow>
+                          <TableCell>Redeem key</TableCell>
+                          <TableCell>
+                            {Data.formatString(row.id)}
+                            <Copy
+                              style={{ cursor: "pointer" }}
+                              onClick={(e) => copyToClipBoard(row.id)}
+                            />
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
                           <TableCell>Wallet Pub KeyHash</TableCell>
-                          <TableCell>{row.walletPubKeyHash}</TableCell>
+                          <TableCell>
+                            {Data.formatString(row.walletPubKeyHash)}
+                            <Copy
+                              style={{ cursor: "pointer" }}
+                              onClick={(e) =>
+                                copyToClipBoard(row.walletPubKeyHash)
+                              }
+                            />
+                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Output Script </TableCell>
                           <TableCell>
                             {Data.formatString(row.redeemerOutputScript)}
+                            <Copy
+                              style={{ cursor: "pointer" }}
+                              onClick={(e) =>
+                                copyToClipBoard(row.redeemerOutputScript)
+                              }
+                            />
                           </TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell>TxHash</TableCell>
+                          <TableCell>Redemption txHash </TableCell>
                           <TableCell>
-                            {Data.formatString(row.redemptionTxHash)}
+                            {row.completedTxHash?.length > 0 ? (
+                              <>
+                                <Link
+                                  target="_blank"
+                                  underline="hover"
+                                  href={
+                                    Utils.getBlockStreamInfo() +
+                                    row.completedTxHash
+                                  }
+                                  className={styles.link}
+                                >
+                                  {Data.formatString(row.completedTxHash)}
+                                </Link>
+                                <ShareLink />
+                              </>
+                            ) : (
+                              "..."
+                            )}
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>TreasuryFee</TableCell>
-                          <TableCell>
-                            {row.treasuryFee}{" "}
-                            <span className={styles.span_note}>%</span>
-                          </TableCell>
+                          <TableCell>{row.treasuryFee} </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>TxMaxFee</TableCell>

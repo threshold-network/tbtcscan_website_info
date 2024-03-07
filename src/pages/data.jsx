@@ -43,20 +43,20 @@ export const redeem_columns = [
     numeric: false,
   },
   {
-    header: "Amount",
+    header: "Amount Request",
     accessor: "amount",
+    numeric: false,
+  },
+  {
+    header: "Amount received",
+    accessor: "actualAmountReceived",
     numeric: false,
   },
   {
     header: "Current State",
     accessor: "status",
     numeric: false,
-  },
-  {
-    header: "Completed TxHash",
-    accessor: "completedTxHash",
-    numeric: false,
-  },
+  }
 ];
 
 export const operator_columns = [
@@ -186,15 +186,19 @@ export const formatStringEnd = (data) => {
 };
 
 export const formatSatoshi = (data) => {
-  return data / Const.SATOSHI_BITCOIN;
+  return (data / Const.SATOSHI_BITCOIN).toFixed(7);
 };
 
 export const formatGwei = (value) => {
   return parseFloat(value / Const.DECIMAL_ETH).toFixed(7);
 };
 
+export const formatGweiFixedZero = (value) => {
+  return parseFloat(value / Const.DECIMAL_ETH).toFixed(0);
+};
+
 export const formatWeiDecimal = (value) => {
-  return new Intl.NumberFormat().format(formatGwei(value));
+  return new Intl.NumberFormat().format(formatGweiFixedZero(value));
 };
 
 export const formatWeiDecimalNoSurplus = (value) => {
@@ -325,12 +329,12 @@ export const calculateTimeMoment = (timestamp) => {
   );
 };
 
-const calculateTreasuryFee = (treasuryFee) => (1 / treasuryFee) * 100;
-const calculateTxMaxFee = (txMaxFee) => txMaxFee / Const.SATOSHI_BITCOIN;
+// const calculateTreasuryFee = (treasuryFee) => (1 / treasuryFee) * 100;
+// const calculateTxMaxFee = (txMaxFee) => txMaxFee / Const.SATOSHI_BITCOIN;
 
-function convertToLittleEndian(hex) {
+function convertFromLittleEndian(hex) {
   try {
-    if (hex == null) return "Can't detect !";
+    if (hex == null) return "...";
     hex = hex.replace("0x", "");
     hex = hex.padStart(8, "0");
     let littleEndianHex = "";
@@ -343,6 +347,21 @@ function convertToLittleEndian(hex) {
   }
 }
 
+export function convertToLittleEndian(txHash) {
+  try {
+    if (txHash === undefined) {
+      return "";
+    }
+    txHash = txHash.replace("0x", "");
+    const chunks = txHash.match(/.{2}/g).reverse();
+    const littleEndianHex = chunks.join("");
+    return "0x" + littleEndianHex;
+  } catch (e) {
+    console.log(e);
+  }
+  return "";
+}
+
 export const formatDepositsData = (rawData) =>
   rawData.map((item) => ({
     id: item.id,
@@ -353,13 +372,13 @@ export const formatDepositsData = (rawData) =>
     actualAmountReceived: parseFloat(item.actualAmountReceived),
     treasuryFee: parseFloat(item.treasuryFee),
     walletPubKeyHash: item.walletPubKeyHash,
-    fundingTxHash: convertToLittleEndian(item.fundingTxHash),
+    fundingTxHash: convertFromLittleEndian(item.fundingTxHash),
     fundingOutputIndex: item.fundingOutputIndex,
     // eslint-disable-next-line no-undef
     blindingFactor: BigInt(item.blindingFactor).toString(),
     refundPubKeyHash: item.refundPubKeyHash,
     refundLocktime: formatDate(
-      parseInt(convertToLittleEndian(item.refundLocktime) * 1000)
+      parseInt(convertFromLittleEndian(item.refundLocktime) * 1000)
     ),
     vault: item.vault,
     depositTimestamp: item.depositTimestamp * 1000,
@@ -367,22 +386,27 @@ export const formatDepositsData = (rawData) =>
     transactions: item.transactions,
   }));
 
-export const formatRedeems = (rawData) =>
-  rawData.map((item) => ({
+export const formatRedeems = (rawData) => {
+  return rawData.map((item) => ({
     id: item.id,
     status: item.status.replace("_", " "),
     redeemer: item.user.id,
     amount: parseFloat(item.amount),
+    actualAmountReceived: parseFloat(item.amount) - item.treasuryFee,
     walletPubKeyHash: item.walletPubKeyHash,
     redeemerOutputScript: item.redeemerOutputScript,
     redemptionTxHash: item.redemptionTxHash,
-    treasuryFee: calculateTreasuryFee(item.treasuryFee),
-    txMaxFee: calculateTxMaxFee(item.txMaxFee),
-    completedTxHash: convertToLittleEndian(item.completedTxHash),
+    treasuryFee: formatSatoshi(item.treasuryFee),
+    txMaxFee: formatSatoshi(item.txMaxFee),
+    completedTxHash: convertFromLittleEndian(item.completedTxHash).replace(
+      "0x",
+      ""
+    ),
     redemptionTimestamp: item.redemptionTimestamp * 1000,
     updateTime: item.updateTimestamp * 1000,
     transactions: item.transactions,
   }));
+};
 
 export const formatOperators = (rawData) =>
   rawData.map((item) => ({
@@ -414,12 +438,14 @@ export const getDeposits = async (network, isSearch, searchInput) => {
     if (!isSearch) {
       data = await client.execute(client.GetAllDepositsQueryDocument, {});
     } else {
+      const fundingTxHashHex = convertToLittleEndian(searchInput.toLowerCase());
       data = await client.execute(client.GetDepositsQueryByUserDocument, {
         user: searchInput.toLowerCase(),
-        id : searchInput.toLowerCase()
+        id: searchInput.toLowerCase(),
+        fundingTxHash: fundingTxHashHex,
       });
     }
-    if (data.data != undefined) {
+    if (data.data !== undefined) {
       return data.data;
     }
   } catch (e) {
@@ -435,13 +461,24 @@ export const getRedeems = async (network, isSearch, searchInput) => {
     if (!isSearch) {
       data = await client.execute(client.GetAllRedemptionsQueryDocument, {});
     } else {
-      data = await client.execute(client.GetRedemptionQueryByUserDocument, {
-        user: searchInput.toLowerCase(),
-        id : searchInput.toLowerCase()
-      });
+      const completedTxHashHex = convertToLittleEndian(
+        searchInput.toLowerCase()
+      );
+      //search redemptionId
+      if (searchInput.startsWith("0x") && searchInput.length > 42) {
+        data = await client.execute(client.SearchRedemptionQueryByIdDocument, {
+          id: searchInput.toLowerCase(),
+        });
+      } else {
+        data = await client.execute(client.GetRedemptionQueryByUserDocument, {
+          user: searchInput.toLowerCase(),
+          id: searchInput.toLowerCase(),
+          completedTxHash: completedTxHashHex,
+        });
+      }
     }
-    if (data.data.redemptions !== undefined) {
-      return formatRedeems(data.data.redemptions);
+    if (data.data !== undefined) {
+      return data.data;
     }
   } catch (e) {
     console.log("error to fetch redeem data " + e);
