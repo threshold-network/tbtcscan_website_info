@@ -27,6 +27,7 @@ import OperatorDetailPage from "./operatorDetail";
 import GroupDetailPage from "./groupDetail";
 import UserDetailPage from "./userDetail";
 import GroupsPage from "./groups";
+import WalletsPage from "./wallets";
 
 const HomePage = () => {
   const [tab, setTab] = React.useState("1");
@@ -54,6 +55,8 @@ const HomePage = () => {
         setTab("operators");
       } else if (pathName.startsWith("/groups")) {
         setTab("groups");
+      } else if (pathName.startsWith("/wallets")) {
+        setTab("wallets");
       } else if (pathName.startsWith("/about")) {
         setTab("about");
       } else if (pathName.startsWith("/token")) {
@@ -116,6 +119,14 @@ const HomePage = () => {
     );
   }
 
+  function wallets() {
+    return (
+      <div>
+        <WalletsPage network={Const.DEFAULT_NETWORK} />
+      </div>
+    );
+  }
+
   function operatorDetail() {
     return <OperatorDetailPage />;
   }
@@ -144,6 +155,8 @@ const HomePage = () => {
           return browserHistory.push("/operators");
         case "groups":
           return browserHistory.push("/groups");
+        case "wallets":
+          return browserHistory.push("/wallets");
         case "token":
           return browserHistory.push("/token");
         case "about":
@@ -233,6 +246,7 @@ const HomePage = () => {
               <Tab sx={{ padding: 0 }} label="Redeems" value="redeems" />
               <Tab sx={{ padding: 0 }} label="Operators" value="operators" />
               <Tab sx={{ padding: 0 }} label="Groups" value="groups" />
+              {isMainnet() && <Tab sx={{ padding: 0 }} label="Wallets" value="wallets" />}
               <Tab sx={{ padding: 0 }} label="Token" value="token" />
             </TabList>
             <div style={{ flex: "1 1 0%" }}></div>
@@ -300,6 +314,7 @@ const HomePage = () => {
           <TabPanel value="redeems">{redeems()}</TabPanel>
           <TabPanel value="operators">{operators()}</TabPanel>
           <TabPanel value="groups">{groups()}</TabPanel>
+          <TabPanel value="wallets">{wallets()}</TabPanel>
           <TabPanel value="operatorDetail">{operatorDetail()}</TabPanel>
           <TabPanel value="groupDetail">{groupDetail()}</TabPanel>
           <TabPanel value="userDetail">{userDetail()}</TabPanel>
