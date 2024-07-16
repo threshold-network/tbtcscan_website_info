@@ -1,5 +1,6 @@
 import * as client from "../../.graphclient";
 import * as Const from "../utils/Cons";
+import axios from "axios";
 import moment from "moment";
 import Web3 from "web3";
 
@@ -136,6 +137,25 @@ export const groups_columns = [
     accessor: "state",
   },
 ];
+
+export const wallets_columns = [
+  {
+    header: "Wallet Address",
+    accessor: "walletBitcoinAddress",
+    numeric: false,
+  },
+  {
+    header: "Bitcoin Balance",
+    accessor: "walletBitcoinBalance",
+    numeric: true,
+  },
+  {
+    header: "Public Key Hash",
+    accessor: "walletPublicKeyHash",
+    numeric: false,
+  },
+];
+
 
 const COUNT_FORMATS = [
   {
@@ -686,6 +706,17 @@ export const getRewardClaimed = async (address) => {
     .cumulativeClaimed(address)
     .call();
   return parseFloat(formatGwei(claimedAmount)).toFixed(1);
+};
+
+export const getProofOfFunds = async () => {
+  if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) return [];
+
+  try {
+    const { data: { wallets, totalBitcoinBalance }} = await axios.get("https://corsproxy.io/?https://api.threshold.network/tbtc/wallets/pof");
+    return { wallets, totalBitcoinBalance };
+  } catch (e) {
+    console.log("fetch balance error: " + e.toString());
+  }
 };
 
 export const getTotalMerkleDropReward = async (address) => {

@@ -507,3 +507,8 @@
 .span_t_token {
     font-size: 20px;
 }
+
+a {
+    color: #1976D2;
+    text-decoration: none;
+}
