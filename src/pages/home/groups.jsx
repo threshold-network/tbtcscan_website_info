@@ -30,7 +30,7 @@ const GroupsPage = ({network}) => {
                     rowData: info.randomBeaconGroups,
                     totalPassengers: totalPassengers
                 });
-                setState(info.statusRecord.groupState)
+                setState(info.statusRecord.groupState === "IDLE" ? "RUNNING" : info.statusRecord.groupState);
             } else {
                 setPageData({
                     isLoading: false,
