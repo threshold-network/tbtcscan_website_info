@@ -353,7 +353,7 @@ function BeaconGroup(operator, currentBlock) {
                             </th>
                             <th>Total Faults</th>
                             <th>Total Slashed Amount</th>
-                            <th>Create At</th>
+                            <th>Created At</th>
                             <th>State</th>
                         </tr>
                         </thead>

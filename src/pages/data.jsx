@@ -125,7 +125,7 @@ export const groups_columns = [
     accessor: "totalSlashedAmount",
   },
   {
-    header: "Create At",
+    header: "Created At",
     accessor: "createdAt",
   },
   {
