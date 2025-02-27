@@ -708,10 +708,9 @@ export const getRewardClaimed = async (address) => {
 
 export const getProofOfFunds = async () => {
   if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) return [];
-  const corsProxy = "https://cors-anywhere.herokuapp.com/";
 
   try {
-    const { data: { wallets, totalBitcoinBalance }} = await axios.get(`${corsProxy}https://api.threshold.network/tbtc/wallets/pof`);
+    const { data: { wallets, totalBitcoinBalance }} = await axios.get(`https://api.threshold.network/tbtc/wallets/pof`);
     return { wallets, totalBitcoinBalance };
   } catch (e) {
     console.log("fetch balance error: " + e.toString());
