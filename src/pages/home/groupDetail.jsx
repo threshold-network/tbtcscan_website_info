@@ -238,7 +238,7 @@ const GroupDetailPage = () => {
                                     </div>
                                 </div>
                                 <div className={styles.operator_detail_header_value_item}>
-                                    <div className={styles.operator_detail_header_value_item_lable}>create at</div>
+                                    <div className={styles.operator_detail_header_value_item_lable}>created at</div>
                                     <div>
                                         <div>{Data.formatTimeToText(pageData.rowData?.createdAt * 1000)}</div>
                                     </div>

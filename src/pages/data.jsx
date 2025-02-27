@@ -125,7 +125,7 @@ export const groups_columns = [
     accessor: "totalSlashedAmount",
   },
   {
-    header: "Create At",
+    header: "Created At",
     accessor: "createdAt",
   },
   {
@@ -290,22 +290,26 @@ export function formatTimeToText(timestamp) {
   }
 }
 
-export function formatTimestampToText(date) {
-  const month = date.months();
-  let day = date.days();
-  const hours = date.hours();
-  const minutes = date.minutes();
-  if (month > 0) {
-    day = day + month * 30;
-  }
-  if (day > 0) {
-    return `${day < 10 ? "0" + day : day}d ${
-      hours < 10 ? "0" + hours : hours
-    }h ago`;
+export function calculateTimeMoment(timestamp) {
+  const now = moment();
+  const past = moment(timestamp);
+
+  const diffInDays = now.diff(past, "days");
+  past.add(diffInDays, "days");
+
+  const diffInHours = now.diff(past, "hours");
+  past.add(diffInHours, "hours");
+
+  const diffInMinutes = now.diff(past, "minutes");
+
+  if (diffInDays > 0) {
+    const daysStr = diffInDays < 10 ? `0${diffInDays}` : diffInDays;
+    const hoursStr = diffInHours < 10 ? `0${diffInHours}` : diffInHours;
+    return `${daysStr}d ${hoursStr}h ago`;
   } else {
-    return `${hours < 10 ? "0" + hours : hours}h ${
-      minutes < 10 ? "0" + minutes : minutes
-    }m ago`;
+    const hoursStr = diffInHours < 10 ? `0${diffInHours}` : diffInHours;
+    const minutesStr = diffInMinutes < 10 ? `0${diffInMinutes}` : diffInMinutes;
+    return `${hoursStr}h ${minutesStr}m ago`;
   }
 }
 
@@ -342,12 +346,6 @@ export function formatDate(date) {
     minute: "2-digit",
   });
 }
-
-export const calculateTimeMoment = (timestamp) => {
-  return formatTimestampToText(
-    moment.duration(moment(new Date().getTime()).diff(moment(timestamp)))
-  );
-};
 
 // const calculateTreasuryFee = (treasuryFee) => (1 / treasuryFee) * 100;
 // const calculateTxMaxFee = (txMaxFee) => txMaxFee / Const.SATOSHI_BITCOIN;
@@ -712,7 +710,7 @@ export const getProofOfFunds = async () => {
   if (Const.DEFAULT_NETWORK === Const.NETWORK_TESTNET) return [];
 
   try {
-    const { data: { wallets, totalBitcoinBalance }} = await axios.get("https://corsproxy.io/?https://api.threshold.network/tbtc/wallets/pof");
+    const { data: { wallets, totalBitcoinBalance }} = await axios.get(`https://api.threshold.network/tbtc/wallets/pof`);
     return { wallets, totalBitcoinBalance };
   } catch (e) {
     console.log("fetch balance error: " + e.toString());

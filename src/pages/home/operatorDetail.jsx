@@ -330,7 +330,7 @@ function BeaconGroup(operator, currentBlock) {
     function checkGroupState(group) {
         //259_200 is group life time, ~30 days assuming 15s block time
         if (group.terminated || parseInt(group.createdAtBlock) + 259200 < currentBlock) {
-            return "Inactive"
+            return "Idle"
         } else {
             return "Active"
         }
@@ -353,7 +353,7 @@ function BeaconGroup(operator, currentBlock) {
                             </th>
                             <th>Total Faults</th>
                             <th>Total Slashed Amount</th>
-                            <th>Create At</th>
+                            <th>Created At</th>
                             <th>State</th>
                         </tr>
                         </thead>
