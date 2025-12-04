@@ -4,6 +4,10 @@ import axios from "axios";
 import moment from "moment";
 import Web3 from "web3";
 
+const INITIAL_CURSOR_TIMESTAMP = "9999999999999";
+const INITIAL_CURSOR_ID =
+  "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
 export const deposit_columns = [
   {
     header: "Updated",
@@ -460,22 +464,35 @@ export const getDeposits = async (network, isSearch, searchInput) => {
 
   try {
     if (!isSearch) {
-      let skip = 0;
-      const promises = [];
       const queriedStats = await client.execute(client.GetStatsRecordAndTbtcTokenQueryDocument, {});
       data.data.statsRecord = queriedStats.data.statsRecord;
       data.data.tbtctoken = queriedStats.data.tbtctoken;
-      const maxIterator = Math.ceil(data.data.statsRecord.numDeposits / Const.MAXIMUM_BATCH_SIZE);  
+      let lastTimestamp = INITIAL_CURSOR_TIMESTAMP;
+      let lastId = INITIAL_CURSOR_ID;
 
-      for (let i = 0; i < maxIterator; i++) {
-        const queriedPromiseData = client.execute(client.GetAllDepositsQueryDocument, {
-          skip: skip
-        });
-        promises.push(queriedPromiseData);
-        skip += Const.MAXIMUM_BATCH_SIZE;
+      while (true) {
+        const page = await client.execute(
+          client.GetAllDepositsQueryDocument,
+          { lastTimestamp, lastId }
+        );
+        const items = page?.data?.deposits ?? [];
+        if (!items.length) {
+          break;
+        }
+
+        data.data.deposits.push(...items);
+
+        if (items.length < Const.MAXIMUM_BATCH_SIZE) {
+          break;
+        }
+
+        const lastItem = items[items.length - 1];
+        if (!lastItem?.updateTimestamp || !lastItem?.id) {
+          break;
+        }
+        lastTimestamp = lastItem.updateTimestamp;
+        lastId = lastItem.id;
       }
-      const queriedData = await Promise.all(promises);
-      data.data.deposits = queriedData.map((item) => item.data.deposits).flat();
     } else {
       const fundingTxHashHex = convertToLittleEndian(searchInput.toLowerCase());
       data = await client.execute(client.GetDepositsQueryByUserDocument, {
@@ -501,23 +518,35 @@ export const getRedeems = async (network, isSearch, searchInput) => {
 
   try {
     if (!isSearch) {
-      let skip = 0;
-      const promises = [];
       const queriedStats = await client.execute(client.GetStatsRecordAndTbtcTokenQueryDocument, {});
       data.data.statsRecord = queriedStats.data.statsRecord;
       data.data.tbtctoken = queriedStats.data.tbtctoken;
-      const maxIterator = Math.ceil(data.data.statsRecord.numRedemptions / Const.MAXIMUM_BATCH_SIZE);  
+      let lastTimestamp = INITIAL_CURSOR_TIMESTAMP;
+      let lastId = INITIAL_CURSOR_ID;
 
-      for (let i = 0; i < maxIterator; i++) {
-        const queriedPromiseData = client.execute(client.GetAllRedemptionsQueryDocument, {
-          skip: skip
-        });
-        promises.push(queriedPromiseData);
-        skip += Const.MAXIMUM_BATCH_SIZE;
+      while (true) {
+        const page = await client.execute(
+          client.GetAllRedemptionsQueryDocument,
+          { lastTimestamp, lastId }
+        );
+        const items = page?.data?.redemptions ?? [];
+        if (!items.length) {
+          break;
+        }
+
+        data.data.redemptions.push(...items);
+
+        if (items.length < Const.MAXIMUM_BATCH_SIZE) {
+          break;
+        }
+
+        const lastItem = items[items.length - 1];
+        if (!lastItem?.updateTimestamp || !lastItem?.id) {
+          break;
+        }
+        lastTimestamp = lastItem.updateTimestamp;
+        lastId = lastItem.id;
       }
-      
-      const queriedData = await Promise.all(promises);
-      data.data.redemptions = queriedData.map((item) => item.data.redemptions).flat();
     } else {
       const completedTxHashHex = convertToLittleEndian(
         searchInput.toLowerCase()
