@@ -11,9 +11,8 @@ const About = () => {
             <div className={styles.div_bottom}>
                 <a target="_blank" href={"https://github.com/suntzu93/threshold-tBTC"}>[Subgraph code] - </a>
                 <a target="_blank" href={"https://github.com/suntzu93/tbtcv2_website_info"}>[Website code] </a>
-                API (Mainnet : <a target="_blank" href={Const.MAINNET_API}>suntzu93/threshold-tbtc</a> -
-                Testnet : <a target="_blank"
-                             href={Const.TESTNET_API}>suntzu93/tbtcv2</a>)
+                API (Mainnet : <code>{Const.MAINNET_API}</code> -
+                Testnet : <code>{Const.TESTNET_API}</code>)
             </div>
         </div>
 

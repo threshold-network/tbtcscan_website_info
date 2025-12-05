@@ -1,5 +1,18 @@
-export const MAINNET_API = "https://gateway-arbitrum.network.thegraph.com/api/f49026e5653284c96b9798f93567eaa1/subgraphs/id/DETCX5Xm6tJfctRcZAxhQB9q3aK8P4BXLbujHmzEBXYV";
-export const TESTNET_API = "https://api.thegraph.com/subgraphs/name/suntzu93/threshold-tbtc-goerli";
+const fallbackProxyBase =
+  import.meta.env.MODE === "staging"
+    ? "https://threshold-api-staging.ops-keep.workers.dev"
+    : "https://api.threshold.network";
+
+const SUBGRAPH_PROXY_BASE = (
+  import.meta.env.VITE_SUBGRAPH_PROXY_BASE ?? fallbackProxyBase
+).replace(/\/$/, "");
+
+export const MAINNET_API =
+  import.meta.env.VITE_SUBGRAPH_PROXY_MAINNET ??
+  `${SUBGRAPH_PROXY_BASE}/subgraph/mainnet`;
+export const TESTNET_API =
+  import.meta.env.VITE_SUBGRAPH_PROXY_TESTNET ??
+  `${SUBGRAPH_PROXY_BASE}/subgraph/testnet`;
 
 export const RPC_ETH_MAINNET = import.meta.env.VITE_RPC_ETH_MAINNET;
 export const RPC_ETH_GOERLI = "https://eth-goerli.g.alchemy.com/v2/BS3qcnNmATIAa9rI7xFMmpyB-RHg_dAm"
