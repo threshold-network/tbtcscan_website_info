@@ -27,8 +27,13 @@
   },
   "scripts": {
     "start": "export PORT=4001 && vite",
+    "start:staging": "MODE=staging ./scripts/set-graph-endpoint.sh staging && yarn codegen && yarn build:staging && yarn preview",
+    "start:prod": "MODE=production ./scripts/set-graph-endpoint.sh production && yarn codegen && yarn build-prod && yarn preview",
+    "deploy:staging": "MODE=staging ./scripts/set-graph-endpoint.sh staging && yarn codegen && yarn build:staging",
+    "deploy:prod": "MODE=production ./scripts/set-graph-endpoint.sh production && yarn codegen && yarn build-prod",
     "build-prod": "vite build --mode production",
     "build": "vite build",
+    "build:staging": "vite build --mode staging",
     "preview": "vite preview --port 4001",
     "prod": "npm run build && PORT=4001 serve -s build ",
     "codegen": "graphclient build",
