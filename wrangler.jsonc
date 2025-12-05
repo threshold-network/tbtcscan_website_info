@@ -1,6 +1,7 @@
 {
   "name": "tbtcscan-website",
   "main": "worker.js",
+  "account_id": "aae90701d7bc564b2670369f6aed0b29",
   "compatibility_date": "2025-12-04",
   "assets": {
     "directory": "./dist"
