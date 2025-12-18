@@ -22,8 +22,6 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import SearchIcon from "@mui/icons-material/Search";
 import TokenPage from "./token";
-import OperatorPage from "./operator";
-import OperatorDetailPage from "./operatorDetail";
 import GroupDetailPage from "./groupDetail";
 import UserDetailPage from "./userDetail";
 import GroupsPage from "./groups";
@@ -151,8 +149,6 @@ const HomePage = () => {
           return browserHistory.push("/deposits");
         case "redeems":
           return browserHistory.push("/redeems");
-        case "operators":
-          return browserHistory.push("/operators");
         case "groups":
           return browserHistory.push("/groups");
         case "wallets":
@@ -244,7 +240,6 @@ const HomePage = () => {
             >
               <Tab sx={{ padding: 0 }} label="Deposits" value="deposits" />
               <Tab sx={{ padding: 0 }} label="Redeems" value="redeems" />
-              <Tab sx={{ padding: 0 }} label="Operators" value="operators" />
               <Tab sx={{ padding: 0 }} label="Groups" value="groups" />
               {isMainnet() && <Tab sx={{ padding: 0 }} label="Wallets" value="wallets" />}
               <Tab sx={{ padding: 0 }} label="Token" value="token" />
@@ -312,10 +307,8 @@ const HomePage = () => {
           </Box>
           <TabPanel value="deposits">{deposits()}</TabPanel>
           <TabPanel value="redeems">{redeems()}</TabPanel>
-          <TabPanel value="operators">{operators()}</TabPanel>
           <TabPanel value="groups">{groups()}</TabPanel>
           <TabPanel value="wallets">{wallets()}</TabPanel>
-          <TabPanel value="operatorDetail">{operatorDetail()}</TabPanel>
           <TabPanel value="groupDetail">{groupDetail()}</TabPanel>
           <TabPanel value="userDetail">{userDetail()}</TabPanel>
           <TabPanel value="token">{token()}</TabPanel>
