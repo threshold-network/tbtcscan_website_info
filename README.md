@@ -8,6 +8,36 @@ It incorporates work from️:
 
 Live at : https://tbtcscan.com/
 
+## Deploying to Cloudflare (Wrangler)
+
+Prereqs (one-time per machine):
+- `corepack enable` so `yarn` v1.22.22 is available.
+- `npm i -g wrangler` or let `npx wrangler` auto-install.
+- Authenticate: `npx wrangler login` (opens browser) or `npx wrangler login --browser none` and paste the URL/token flow in a headless shell.
+
+Config highlights:
+- `wrangler.jsonc` sets the Worker entry (`worker.js`) and serves static assets from `dist` using the `ASSETS` binding.
+- SPA fallback is handled in `worker.js` by returning `index.html` on 404s.
+
+One-liner deploy (production):
+```bash
+scripts/deploy-cloudflare.sh prod
+```
+
+What the script does:
+1) Rewrites `.graphclientrc.yml` for the chosen target (`prod` or `staging`).
+2) Runs `yarn codegen`.
+3) Builds (`yarn build-prod` or `yarn build:staging`) into `dist/`.
+4) Runs `npx wrangler deploy` using `wrangler.jsonc`.
+
+Manual deploy (if you prefer explicit steps):
+```bash
+MODE=production ./scripts/set-graph-endpoint.sh production
+yarn codegen
+yarn build-prod           # or yarn build:staging
+npx wrangler deploy
+```
+
 ## Subgraph proxy and codegen
 
 1. Environment files

@@ -2,7 +2,7 @@ sources:
   - name: tbtc-mainnet
     handler:
       graphql:
-        endpoint: https://threshold-api-staging.ops-keep.workers.dev/subgraph/mainnet
+        endpoint: https://api.threshold.network/subgraph/mainnet
     transforms:
       - autoPagination:
           limitOfRecords: 2000
