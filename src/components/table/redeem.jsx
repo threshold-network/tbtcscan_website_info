@@ -27,7 +27,7 @@ import * as Utils from "../../utils/utils";
 import { getColorByStatus } from "./view_utils";
 import { ReactComponent as Copy } from "../../assets/copy.svg";
 
-const STAKING_URL = "https://app.threshold.network/get-tbtc?tab=stake";
+const STAKING_URL = "https://app.threshold.network/stake";
 
 // Fee Waiver Badge Component with Tooltip
 const FeeWaiverBadge = ({ feesSaved }) => (
