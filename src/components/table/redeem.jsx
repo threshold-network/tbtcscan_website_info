@@ -18,12 +18,58 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
+import Tooltip from "@mui/material/Tooltip";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { ReactComponent as ShareLink } from "../../assets/link.svg";
 import * as Data from "../../pages/data";
 import TransactionTimeline from "./timeline";
 import * as Utils from "../../utils/utils";
 import { getColorByStatus } from "./view_utils";
 import { ReactComponent as Copy } from "../../assets/copy.svg";
+
+const STAKING_URL = "https://app.threshold.network/stake";
+
+// Fee Waiver Badge Component with Tooltip
+const FeeWaiverBadge = ({ feesSaved }) => (
+  <Tooltip
+    title={
+      <div style={{ padding: "8px", maxWidth: "280px" }}>
+        <div style={{ fontWeight: "bold", marginBottom: "8px", color: "#4ade80" }}>
+          Fee Waiver Applied
+        </div>
+        <div style={{ marginBottom: "8px" }}>
+          <span style={{ color: "#9ca3af" }}>Fees Saved: </span>
+          <span style={{ color: "#fff", fontWeight: "500" }}>{feesSaved} BTC</span>
+        </div>
+        <div style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "8px" }}>
+          T stakers get fee waivers on tBTC redemptions.
+        </div>
+        <a
+          href={STAKING_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#a78bfa", textDecoration: "underline", fontSize: "12px" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          Stake T to save on fees
+        </a>
+      </div>
+    }
+    arrow
+    placement="top"
+  >
+    <LocalOfferIcon
+      sx={{
+        fontSize: 16,
+        color: "#4ade80",
+        marginLeft: "6px",
+        verticalAlign: "middle",
+        cursor: "pointer",
+      }}
+      onClick={(e) => e.stopPropagation()}
+    />
+  </Tooltip>
+);
 
 export const RedeemTable = ({ columns, data, isLoading }) => {
   const columnData = useMemo(() => columns, [columns]);
@@ -182,6 +228,7 @@ export const RedeemTable = ({ columns, data, isLoading }) => {
 
           <TableCell align="left" sx={{ color: getColorByStatus(row.status) }}>
             {row.status}
+            {row.hasFeeWaiver && <FeeWaiverBadge feesSaved={row.feesSaved} />}
           </TableCell>
         </TableRow>
         <TableRow className={styles.container_detail}>
@@ -262,6 +309,31 @@ export const RedeemTable = ({ columns, data, isLoading }) => {
                           <TableCell>TreasuryFee</TableCell>
                           <TableCell>{row.treasuryFee} </TableCell>
                         </TableRow>
+                        {row.hasFeeWaiver && (
+                          <TableRow>
+                            <TableCell>
+                              <span style={{ color: "#4ade80", fontWeight: 500 }}>
+                                Fee Waiver
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <span style={{ color: "#4ade80" }}>
+                                Saved {row.feesSaved} BTC
+                              </span>
+                              {" "}
+                              <Link
+                                href={STAKING_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                underline="hover"
+                                sx={{ fontSize: "12px", color: "#a78bfa" }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Stake T to save on fees
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        )}
                         <TableRow>
                           <TableCell>TxMaxFee</TableCell>
                           <TableCell>

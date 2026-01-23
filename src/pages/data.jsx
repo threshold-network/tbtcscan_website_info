@@ -408,26 +408,43 @@ export const formatDepositsData = (rawData) =>
     transactions: item.transactions,
   }));
 
+// Fee waiver detection: treasury fee rate is 0.2% (0.002)
+const TREASURY_FEE_RATE = 0.002;
+
 export const formatRedeems = (rawData) => {
-  return rawData.map((item) => ({
-    id: item.id,
-    status: item.status.replace("_", " "),
-    redeemer: item.user.id,
-    amount: parseFloat(item.amount),
-    actualAmountReceived: parseFloat(item.amount) - item.treasuryFee,
-    walletPubKeyHash: item.walletPubKeyHash,
-    redeemerOutputScript: item.redeemerOutputScript,
-    redemptionTxHash: item.redemptionTxHash,
-    treasuryFee: formatSatoshi(item.treasuryFee),
-    txMaxFee: formatSatoshi(item.txMaxFee),
-    completedTxHash: convertFromLittleEndian(item.completedTxHash).replace(
-      "0x",
-      ""
-    ),
-    redemptionTimestamp: item.redemptionTimestamp * 1000,
-    updateTime: item.updateTimestamp * 1000,
-    transactions: item.transactions,
-  }));
+  return rawData.map((item) => {
+    const amount = parseFloat(item.amount);
+    const actualTreasuryFee = parseFloat(item.treasuryFee || 0);
+    const expectedTreasuryFee = amount * TREASURY_FEE_RATE;
+    // Consider it a fee waiver if the actual fee is significantly less than expected
+    // (less than 50% of expected fee indicates partial or full waiver)
+    const hasFeeWaiver = actualTreasuryFee < expectedTreasuryFee * 0.5;
+    const feesSaved = hasFeeWaiver ? expectedTreasuryFee - actualTreasuryFee : 0;
+
+    return {
+      id: item.id,
+      status: item.status.replace("_", " "),
+      redeemer: item.user.id,
+      amount: amount,
+      actualAmountReceived: amount - actualTreasuryFee,
+      walletPubKeyHash: item.walletPubKeyHash,
+      redeemerOutputScript: item.redeemerOutputScript,
+      redemptionTxHash: item.redemptionTxHash,
+      treasuryFee: formatSatoshi(actualTreasuryFee),
+      txMaxFee: formatSatoshi(item.txMaxFee),
+      completedTxHash: convertFromLittleEndian(item.completedTxHash).replace(
+        "0x",
+        ""
+      ),
+      redemptionTimestamp: item.redemptionTimestamp * 1000,
+      updateTime: item.updateTimestamp * 1000,
+      transactions: item.transactions,
+      // Fee waiver fields
+      hasFeeWaiver,
+      feesSaved: formatSatoshi(feesSaved),
+      feesSavedRaw: feesSaved,
+    };
+  });
 };
 
 export const formatOperators = (rawData) =>
